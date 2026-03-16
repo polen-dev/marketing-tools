@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dinâmica de Marca · Polen</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#fff;color:#111;min-height:100vh}
+.wrap{max-width:680px;margin:0 auto;padding:2rem 1.25rem}
+.screen{display:none}
+.screen.active{display:block}
+
+.progress-wrap{display:flex;align-items:center;gap:12px;margin-bottom:2.5rem}
+.progress-bar{flex:1;height:2px;background:#e5e5e5;border-radius:1px;overflow:hidden}
+.progress-fill{height:100%;background:#111;border-radius:1px;transition:width 0.5s ease}
+.progress-pct{font-size:12px;color:#888;min-width:32px;text-align:right}
+
+.tag{font-size:11px;letter-spacing:.08em;color:#888;text-transform:uppercase;margin-bottom:.75rem}
+.title{font-size:26px;font-weight:600;margin-bottom:.5rem;line-height:1.2}
+.sub{font-size:14px;color:#555;margin-bottom:2rem;line-height:1.65;max-width:520px}
+
+.legend{display:flex;gap:1.5rem;margin-bottom:.75rem}
+.li{display:flex;align-items:center;gap:6px;font-size:12px;color:#888}
+.dot{width:9px;height:9px;border-radius:50%}
+.dy{background:#111}
+.dn{border:1.5px solid #999}
+.d0{background:#ddd}
+
+.counter{font-size:12px;color:#888;margin-bottom:1.25rem;min-height:18px}
+.counter b{color:#111;font-weight:600}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;margin-bottom:2rem}
+.wc{
+  padding:11px 14px;border-radius:8px;border:1px solid #e0e0e0;
+  background:#fff;cursor:pointer;font-size:13px;color:#777;
+  text-align:center;transition:all .13s;user-select:none;
+  line-height:1.35;min-height:48px;display:flex;align-items:center;justify-content:center
+}
+.wc:hover{border-color:#aaa;color:#333}
+.wc.yes{border-color:#111;border-width:1.5px;color:#111;font-weight:600;background:#fff}
+.wc.no{border-color:#ccc;background:#f7f7f7;color:#aaa;text-decoration:line-through}
+
+.actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn{padding:11px 24px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#111;font-size:14px;cursor:pointer;transition:background .1s;font-family:inherit}
+.btn:hover{background:#f5f5f5}
+.btn-fill{background:#111;color:#fff;border-color:#111}
+.btn-fill:hover{background:#333}
+.skip{font-size:13px;color:#999;background:none;border:none;cursor:pointer;font-family:inherit;padding:0}
+.skip:hover{color:#333}
+
+.name-wrap{margin-bottom:2.5rem}
+.name-wrap label{display:block;font-size:11px;letter-spacing:.07em;color:#888;text-transform:uppercase;margin-bottom:8px}
+.name-wrap input{padding:11px 14px;border-radius:8px;border:1px solid #ccc;font-size:15px;font-family:inherit;width:100%;max-width:300px;color:#111}
+.name-wrap input:focus{outline:none;border-color:#111}
+
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:8px;margin:1.5rem 0 2.5rem}
+.step{padding:14px;border:1px solid #e5e5e5;border-radius:8px}
+.step-n{font-size:11px;letter-spacing:.06em;color:#888;margin-bottom:6px;text-transform:uppercase}
+.step-t{font-size:13px;font-weight:600;color:#111;margin-bottom:3px}
+.step-s{font-size:12px;color:#777;line-height:1.4}
+
+.intro-note{font-size:14px;color:#555;line-height:1.65;margin-bottom:2.5rem;max-width:480px}
+
+hr{border:none;border-top:1px solid #eee;margin:1.75rem 0}
+
+.res-by{font-size:13px;color:#888;margin-bottom:.25rem}
+.res-title{font-size:22px;font-weight:600;margin-bottom:.25rem}
+.res-sub{font-size:14px;color:#555;margin-bottom:2rem;line-height:1.5}
+
+.rnd{margin-bottom:1.5rem}
+.rnd-label{font-size:11px;letter-spacing:.07em;color:#888;margin-bottom:.75rem;text-transform:uppercase}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px}
+.cy{border:1.5px solid #111;color:#111;background:#fff;font-weight:600}
+.cn{border:1px solid #ddd;color:#aaa;background:#f7f7f7;text-decoration:line-through}
+.c0{border:1px solid #eee;color:#ccc;background:transparent}
+
+.syn-row{display:flex;gap:10px;margin-bottom:.5rem;flex-wrap:wrap;align-items:baseline}
+.syn-l{font-size:12px;color:#888;min-width:95px}
+.syn-v{font-size:13px;color:#111}
+
+.copy-label{font-size:11px;letter-spacing:.07em;color:#888;margin-bottom:.5rem;text-transform:uppercase}
+.copybox{
+  font-family:'Courier New',monospace;font-size:12px;color:#555;
+  background:#f9f9f9;border:1px solid #e5e5e5;border-radius:8px;
+  padding:1rem;line-height:1.7;max-height:210px;overflow-y:auto;
+  white-space:pre-wrap;word-break:break-word;margin-bottom:.75rem
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="s-intro" class="screen active">
+  <div class="tag">dinâmica de marca · Polen</div>
+  <div class="title">Qual é a cara da Polen?</div>
+  <p class="intro-note">Três rodadas de escolha rápida. Você vai ver palavras e decidir: combina com a Polen ou não combina. Não existe resposta certa — o que vale é a sua percepção.</p>
+  <div class="steps">
+    <div class="step"><div class="step-n">Rodada 1</div><div class="step-t">Personalidade</div><div class="step-s">Como a marca deve ser percebida</div></div>
+    <div class="step"><div class="step-n">Rodada 2</div><div class="step-t">Propósito</div><div class="step-s">O que define o DNA da Polen</div></div>
+    <div class="step"><div class="step-n">Rodada 3</div><div class="step-t">Comunicação</div><div class="step-s">Como a Polen deve falar</div></div>
+  </div>
+  <div class="name-wrap">
+    <label>Seu nome</label>
+    <input type="text" id="user-name" placeholder="Ex: Ana Lima" />
+  </div>
+  <button class="btn btn-fill" onclick="startGame()">Começar</button>
+</div>
+
+<div id="s-game" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+    <div class="progress-pct" id="pct">0%</div>
+  </div>
+  <div class="tag" id="r-tag"></div>
+  <div class="title" id="r-title"></div>
+  <div class="sub" id="r-sub"></div>
+  <div class="legend">
+    <div class="li"><div class="dot dy"></div>combina</div>
+    <div class="li"><div class="dot dn"></div>não combina</div>
+    <div class="li"><div class="dot d0"></div>sem voto</div>
+  </div>
+  <div class="counter" id="counter"></div>
+  <div class="grid" id="grid"></div>
+  <div class="actions">
+    <button class="btn btn-fill" id="btn-next" onclick="next()">Próxima rodada</button>
+    <button class="skip" onclick="next()">pular sem votar</button>
+  </div>
+</div>
+
+<div id="s-result" class="screen">
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <div class="progress-pct">100%</div>
+  </div>
+  <div class="res-by" id="res-by"></div>
+  <div class="res-title">Sua percepção de marca</div>
+  <div class="res-sub">Abaixo o mapa do que você marcou. Seus dados já foram enviados para a planilha.</div>
+  <div class="rnd"><div class="rnd-label">Personalidade</div><div class="chips" id="c1"></div></div>
+  <div class="rnd"><div class="rnd-label">Propósito</div><div class="chips" id="c2"></div></div>
+  <div class="rnd"><div class="rnd-label">Comunicação</div><div class="chips" id="c3"></div></div>
+  <hr>
+  <div style="margin-bottom:1.5rem">
+    <div class="rnd-label" style="margin-bottom:.75rem">Síntese rápida</div>
+    <div class="syn-row"><div class="syn-l">Combina</div><div class="syn-v" id="sy"></div></div>
+    <div class="syn-row"><div class="syn-l">Não combina</div><div class="syn-v" id="sn"></div></div>
+  </div>
+  <hr>
+  <div class="copy-label">resultado para copiar e enviar</div>
+  <div class="copybox" id="copybox"></div>
+  <div class="actions">
+    <button class="btn btn-fill" onclick="doCopy()" id="btn-copy">Copiar resultado</button>
+    <button class="btn" onclick="restart()">Refazer</button>
+  </div>
+</div>
+
+</div>
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKvdIyB7RtNrngoFbBYkepQcM-Mq-MJMxSTngV5iUHoZXxJcSmKkxrXvhUrEglPjFSAg/exec';
+
+const R=[
+  {id:1,tag:"Rodada 1 de 3",title:"Personalidade",
+   sub:"Como você quer que o mercado perceba a Polen? Clique uma vez para combinar, duas para não combinar.",
+   words:["Confiável","Técnica","Calorosa","Acessível","Pioneira","Sustentável","Parceira","Especialista","Transformadora","Humanizada","Transparente","Ousada","Séria","Distante","Burocrática","Inovadora","Sólida","Fria"]},
+  {id:2,tag:"Rodada 2 de 3",title:"Propósito",
+   sub:"O que define o DNA da Polen? O que faz parte da essência.",
+   words:["Circularidade","Impacto mensurável","Logística reversa","Comunidade","Parceria","Impacto Social","Compliance","Transformação","Acordo Setorial","Inclusão","Escala","Meio ambiente","ESG","Resultado","Regulatório","Inovadora","Economia circular"]},
+  {id:3,tag:"Rodada 3 de 3",title:"Comunicação",
+   sub:"Como a Polen deve falar? Qual tom é a cara da marca.",
+   words:["Direta","Próxima","Simples","Inspiradora","Assertiva","Educativa","Empática","Otimista","Engajadora","Acolhedora","Técnica demais","Corporativa","Formal","Urgente","Burocrática","Neutra","Seca","Impactante"]}
+];
+
+let st={name:"",round:0,votes:{}};
+
+function startGame(){
+  st.name=document.getElementById('user-name').value.trim()||"Participante";
+  st.round=0;st.votes={};
+  R.forEach(r=>{st.votes[r.id]={};});
+  show('s-game');renderRound();
+}
+
+function show(id){['s-intro','s-game','s-result'].forEach(s=>document.getElementById(s).classList.toggle('active',s===id));}
+
+function renderRound(){
+  const r=R[st.round];
+  const p=Math.round((st.round/R.length)*100);
+  document.getElementById('progress').style.width=p+'%';
+  document.getElementById('pct').textContent=p+'%';
+  document.getElementById('r-tag').textContent=r.tag;
+  document.getElementById('r-title').textContent=r.title;
+  document.getElementById('r-sub').textContent=r.sub;
+  document.getElementById('btn-next').textContent=st.round===R.length-1?'Ver resultado':'Próxima rodada';
+  renderGrid(r);updateCtr(r);
+}
+
+function renderGrid(r){
+  const g=document.getElementById('grid');g.innerHTML='';
+  r.words.forEach(w=>{
+    const v=st.votes[r.id][w];
+    const el=document.createElement('div');
+    el.className='wc'+(v==='yes'?' yes':v==='no'?' no':'');
+    el.textContent=w;el.onclick=()=>toggle(r.id,w,el,r);g.appendChild(el);
+  });
+}
+
+function toggle(rid,w,el,r){
+  const cur=st.votes[rid][w];
+  const nx=!cur?'yes':cur==='yes'?'no':null;
+  if(nx)st.votes[rid][w]=nx;else delete st.votes[rid][w];
+  el.className='wc'+(nx==='yes'?' yes':nx==='no'?' no':'');
+  updateCtr(r);
+}
+
+function updateCtr(r){
+  const v=st.votes[r.id];
+  const y=Object.values(v).filter(x=>x==='yes').length;
+  const n=Object.values(v).filter(x=>x==='no').length;
+  document.getElementById('counter').innerHTML='<b>'+y+'</b> combinam · <b>'+n+'</b> não combinam';
+}
+
+function next(){
+  if(st.round<R.length-1){st.round++;renderRound();}else showResult();
+}
+
+function showResult(){
+  show('s-result');
+  document.getElementById('res-by').textContent=st.name;
+  
+  R.forEach(r=>{
+    const c=document.getElementById('c'+r.id);c.innerHTML='';
+    r.words.filter(w=>st.votes[r.id][w]==='yes').forEach(w=>{const s=document.createElement('span');s.className='chip cy';s.textContent=w;c.appendChild(s);});
+    r.words.filter(w=>st.votes[r.id][w]==='no').forEach(w=>{const s=document.createElement('span');s.className='chip cn';s.textContent=w;c.appendChild(s);});
+    r.words.filter(w=>!st.votes[r.id][w]).forEach(w=>{const s=document.createElement('span');s.className='chip c0';s.textContent=w;c.appendChild(s);});
+  });
+
+  const ay=R.flatMap(r=>Object.entries(st.votes[r.id]).filter(([,v])=>v==='yes').map(([w])=>w));
+  const an=R.flatMap(r=>Object.entries(st.votes[r.id]).filter(([,v])=>v==='no').map(([w])=>w));
+  
+  document.getElementById('sy').textContent=ay.length?ay.join(', '):'—';
+  document.getElementById('sn').textContent=an.length?an.join(', '):'—';
+  buildCopy(ay,an);
+
+  // ENVIO AUTOMÁTICO PARA O GOOGLE SHEETS
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      nome: st.name,
+      combina: ay,
+      nao_combina: an
+    })
+  });
+}
+
+function buildCopy(ay,an){
+  const dt=new Date().toLocaleDateString('pt-BR');
+  const L=['DINÂMICA DE MARCA — POLEN','Participante: '+st.name,'Data: '+dt,''];
+  R.forEach(r=>{
+    const y=Object.entries(st.votes[r.id]).filter(([,v])=>v==='yes').map(([w])=>w);
+    const n=Object.entries(st.votes[r.id]).filter(([,v])=>v==='no').map(([w])=>w);
+    L.push(r.title.toUpperCase());
+    L.push('Combina: '+(y.length?y.join(', '):'(nenhuma)'));
+    L.push('Não combina: '+(n.length?n.join(', '):'(nenhuma)'));
+    L.push('');
+  });
+  L.push('SÍNTESE');
+  L.push('Combina: '+(ay.length?ay.join(', '):'—'));
+  L.push('Não combina: '+(an.length?an.join(', '):'—'));
+  document.getElementById('copybox').textContent=L.join('\n');
+}
+
+function doCopy(){
+  navigator.clipboard.writeText(document.getElementById('copybox').textContent).then(()=>{
+    const b=document.getElementById('btn-copy');b.textContent='Copiado';
+    setTimeout(()=>{b.textContent='Copiar resultado';},2000);
+  });
+}
+
+function restart(){
+  st={name:"",round:0,votes:{}};
+  document.getElementById('user-name').value='';
+  document.getElementById('progress').style.width='0%';
+  show('s-intro');
+}
+</script>
+</body>
+</html>
