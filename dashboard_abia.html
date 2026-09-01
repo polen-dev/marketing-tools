@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campanha ABIA — Acompanhamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700;900&family=Red+Hat+Mono:wght@400;500;700&family=Red+Hat+Text:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #F3F3F3;
+    display: flex; align-items: flex-start; justify-content: center;
+    min-height: 100vh; padding: 32px;
+    font-family: 'Red Hat Text', sans-serif;
+  }
+  .wrap { background: #FBFBFB; padding: 28px 28px 20px; border-radius: 16px; max-width: 860px; width: 100%; }
+
+  .page-title { font-size: 22px; font-weight: 700; color: #1C2B3A; font-family: 'Red Hat Display', sans-serif; }
+  .page-title span { font-size: 15px; font-weight: 400; color: #888888; }
+  .page-sub { font-size: 12px; color: #888888; margin-top: 3px; font-family: 'Red Hat Text', sans-serif; }
+
+  .banner { margin: 16px 0 20px; background: #fff; border: 1px solid #E2E2E2; border-left: 3px solid #C49A2A;
+            border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #555; font-family: 'Red Hat Text', sans-serif; }
+  .banner b { color: #1C2B3A; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 18px; }
+  .kpi { background: #fff; border: 1px solid #E2E2E2; border-radius: 10px; padding: 14px 16px; }
+  .kpi-label { font-size: 11px; color: #888888; margin-bottom: 6px; font-family: 'Red Hat Text', sans-serif; }
+  .kpi-value { font-size: 22px; font-weight: 700; color: #1C2B3A; font-family: 'Red Hat Mono', monospace; }
+  .kpi-delta { font-size: 11px; color: #888888; margin-top: 4px; font-family: 'Red Hat Mono', monospace; }
+  .kpi-delta.pos { color: #2D7A4F; }
+  .kpi-delta.neg { color: #A63D2F; }
+
+  .two-col { display: grid; grid-template-columns: minmax(0,1.55fr) minmax(0,1fr); gap: 16px; margin-bottom: 16px; }
+  .chart-card { background: #fff; border: 1px solid #E2E2E2; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .chart-title { font-size: 12px; color: #888888; margin-bottom: 14px; letter-spacing: 0.04em; text-transform: uppercase; font-family: 'Red Hat Display', sans-serif; }
+  .chart-note { font-size: 11px; color: #999; margin-top: 12px; font-family: 'Red Hat Text', sans-serif; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+  .leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #666; font-family: 'Red Hat Text', sans-serif; }
+  .leg-sq { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+  table.data { width: 100%; border-collapse: collapse; font-family: 'Red Hat Text', sans-serif; font-size: 12px; }
+  table.data th { text-align: right; padding: 8px 6px; color: #888; font-weight: 500; border-bottom: 1px solid #E2E2E2; }
+  table.data th.l, table.data td.l { text-align: left; }
+  table.data td { padding: 8px 6px; text-align: right; color: #1C2B3A; border-bottom: 1px solid #F0F0F0; font-family: 'Red Hat Mono', monospace; }
+  table.data td.l { color: #1C2B3A; font-family: 'Red Hat Text', sans-serif; }
+  table.data tr.total td { font-weight: 700; border-top: 1px solid #E2E2E2; border-bottom: none; }
+  table.data tr.total td.l { font-family: 'Red Hat Display', sans-serif; }
+
+  .footer { margin-top: 22px; padding-top: 12px; border-top: 1px solid #E2E2E2; text-align: center; }
+  .footer-copy { font-size: 10px; color: #888; font-family: 'Red Hat Text', sans-serif; }
+  .footer-conf { font-size: 9px; color: #AAA; font-family: 'Red Hat Text', sans-serif; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  @media (max-width: 680px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============================================================= -->
+  <!-- >>> BLOCO DE DADOS — a tarefa diária do Cowork (8h) substitui  -->
+  <!-- APENAS este objeto com os números puxados do HubSpot.          -->
+  <!-- Não é preciso mexer em mais nada abaixo.                        -->
+  <!-- ============================================================= -->
+  <script>
+  const DATA = {
+    atualizadoEm: "01/09/2026 · 18h",
+    metas: { abertura: 30, ctrAbertura: 8, optout: 2, mqls: 3 },
+    // Segmentos — números acumulados da campanha por segmento
+    segmentos: [
+      { nome: "Nacional (N)",      enviados: 20, aberturas: 5, cliques: 0, respostas: 0, optout: 0 },
+      { nome: "Multinacional (M)", enviados: 31, aberturas: 4, cliques: 3, respostas: 0, optout: 0 }
+    ],
+    // MQL conforme definição da campanha (clique no CTA ou formulário). Validar clicantes únicos.
+    mqls: 3,
+    // Funil da cadência — por e-mail (agregado N+M). E2–E6 preenchem conforme disparam.
+    funil: {
+      labels:   ["E1","E2","E3","E4","E5","E6"],
+      datas:    ["01/09","05/09","12/09","19/09","26/09","03/10"],
+      enviado:  [51, 0, 0, 0, 0, 0],
+      abriu:    [9,  0, 0, 0, 0, 0],
+      clicou:   [3,  0, 0, 0, 0, 0],
+      statusFront: "E1 enviado · próximo: E2 em 05/09"
+    }
+  };
+  </script>
+  <!-- ===================== FIM DO BLOCO DE DADOS ==================== -->
+
+  <div class="page-title">Campanha ABIA — Acompanhamento <span>· Alimentos &amp; Bebidas</span></div>
+  <div class="page-sub" id="sub"></div>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="kpi-row" id="kpis"></div>
+
+  <div class="two-col">
+    <div class="chart-card">
+      <div class="chart-title">Funil da cadência — onde os contatos estão</div>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-sq" style="background:#1C2B3A;"></div>Enviado</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#5A7A94;"></div>Abriu</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#B8C4CC;"></div>Clicou</div>
+      </div>
+      <div style="position:relative; width:100%; height:260px;">
+        <canvas id="funil" role="img" aria-label="Funil de envio, abertura e clique por e-mail da cadência"></canvas>
+      </div>
+      <div class="chart-note" id="funilNote"></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Nacional × Multinacional (E1)</div>
+      <div class="legend">
+        <div class="leg-item"><div class="leg-sq" style="background:#1C2B3A;"></div>Nacional</div>
+        <div class="leg-item"><div class="leg-sq" style="background:#5A7A94;"></div>Multinacional</div>
+      </div>
+      <div style="position:relative; width:100%; height:260px;">
+        <canvas id="seg" role="img" aria-label="Comparativo de abertura e CTR entre segmentos"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Números por segmento</div>
+    <table class="data">
+      <thead>
+        <tr>
+          <th class="l">Segmento</th><th>Enviados</th><th>Abertura</th><th>Cliques</th>
+          <th>CTR s/ abertura</th><th>Respostas</th><th>Opt-out</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <div class="footer-copy">© Polen — Solução e Valoração de Resíduos Ltda.</div>
+    <div class="footer-conf">Informação de uso interno — não divulgue sem aprovação.</div>
+  </div>
+</div>
+
+<script>
+  const NAVY='#1C2B3A', STEEL='#5A7A94', SLATE='#B8C4CC', TICK='#888888', GRID='rgba(180,180,180,0.3)';
+  const pct = (n,d) => d>0 ? (n/d*100) : 0;
+  const fmtPct = v => v.toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+
+  // ---- Agregados a partir do DATA ----
+  const S = DATA.segmentos;
+  const agg = S.reduce((a,s)=>({enviados:a.enviados+s.enviados,aberturas:a.aberturas+s.aberturas,
+    cliques:a.cliques+s.cliques,respostas:a.respostas+s.respostas,optout:a.optout+s.optout}),
+    {enviados:0,aberturas:0,cliques:0,respostas:0,optout:0});
+  const aberturaPct = pct(agg.aberturas,agg.enviados);
+  const ctrAbertura = pct(agg.cliques,agg.aberturas);
+  const optoutPct   = pct(agg.optout,agg.enviados);
+
+  document.getElementById('sub').textContent =
+    'Dados ao vivo do HubSpot (portal 4445510) · atualização diária às 8h · atualizado em ' + DATA.atualizadoEm;
+  document.getElementById('banner').innerHTML =
+    '<b>Campanha recém-lançada.</b> ' + DATA.funil.statusFront +
+    '. Aberturas/cliques do E1 são de horas após o disparo e ainda vão subir ao longo do dia.';
+
+  // ---- KPI cards ----
+  const delta = (val, meta, higherIsBetter=true, unit='%') => {
+    const diff = val - meta;
+    const good = higherIsBetter ? diff >= 0 : diff <= 0;
+    const sign = diff>=0?'+':'';
+    return `<div class="kpi-delta ${good?'pos':'neg'}">${sign}${diff.toLocaleString('pt-BR',{maximumFractionDigits:1})} p.p. vs meta ${meta}${unit}</div>`;
+  };
+  const kpis = [
+    {label:'Enviados', value: agg.enviados.toString(), delta:'<div class="kpi-delta">E1 · '+S.map(s=>s.nome.charAt(0)+' '+s.enviados).join(' / ')+'</div>'},
+    {label:'Taxa de abertura', value: fmtPct(aberturaPct), delta: delta(aberturaPct, DATA.metas.abertura, true)},
+    {label:'CTR (sobre quem abriu)', value: fmtPct(ctrAbertura), delta: delta(ctrAbertura, DATA.metas.ctrAbertura, true)},
+    {label:'Cliques', value: agg.cliques.toString(), delta:'<div class="kpi-delta">no e-mail</div>'},
+    {label:'Respostas', value: agg.respostas.toString(), delta:'<div class="kpi-delta">→ Fluxo C (Lead + tarefa)</div>'},
+    {label:'Opt-out', value: fmtPct(optoutPct), delta: delta(optoutPct, DATA.metas.optout, false)},
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map(k=>
+    `<div class="kpi"><div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div>${k.delta}</div>`).join('');
+
+  // ---- Table ----
+  const rowHtml = (nome,d)=>{
+    const ab = pct(d.aberturas,d.enviados), ct = pct(d.cliques,d.aberturas), op = pct(d.optout,d.enviados);
+    return `<tr><td class="l">${nome}</td><td>${d.enviados}</td><td>${fmtPct(ab)}</td><td>${d.cliques}</td><td>${fmtPct(ct)}</td><td>${d.respostas}</td><td>${fmtPct(op)}</td></tr>`;
+  };
+  document.getElementById('tbody').innerHTML =
+    S.map(s=>rowHtml(s.nome,s)).join('') +
+    `<tr class="total"><td class="l">Total</td><td>${agg.enviados}</td><td>${fmtPct(aberturaPct)}</td><td>${agg.cliques}</td><td>${fmtPct(ctrAbertura)}</td><td>${agg.respostas}</td><td>${fmtPct(optoutPct)}</td></tr>`;
+
+  // ---- Chart defaults ----
+  const xAxis = { ticks:{color:TICK,font:{family:'Red Hat Mono',size:11}}, grid:{display:false}, border:{color:'rgba(0,0,0,0.1)'} };
+  const yAxis = { beginAtZero:true, ticks:{color:TICK,font:{family:'Red Hat Mono',size:10}}, grid:{color:GRID}, border:{display:false} };
+  const tooltip = { backgroundColor:'#fff', titleColor:NAVY, bodyColor:'#666', borderColor:'#E2E2E2', borderWidth:1,
+    titleFont:{family:'Red Hat Display'}, bodyFont:{family:'Red Hat Text'} };
+
+  // ---- Funil chart ----
+  new Chart(document.getElementById('funil'), {
+    type:'bar',
+    data:{ labels: DATA.funil.labels.map((l,i)=>l+'  '+DATA.funil.datas[i]),
+      datasets:[
+        {label:'Enviado', data:DATA.funil.enviado, backgroundColor:NAVY, borderRadius:3, borderSkipped:false},
+        {label:'Abriu',   data:DATA.funil.abriu,   backgroundColor:STEEL, borderRadius:3, borderSkipped:false},
+        {label:'Clicou',  data:DATA.funil.clicou,  backgroundColor:SLATE, borderRadius:3, borderSkipped:false},
+      ]},
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip }, scales:{ x:xAxis, y:yAxis } }
+  });
+  document.getElementById('funilNote').textContent =
+    'Cada grupo é um e-mail da régua. E2–E6 preenchem conforme disparam (05/09 → 03/10).';
+
+  // ---- Segment comparison chart (E1) ----
+  const seg = DATA.segmentos;
+  new Chart(document.getElementById('seg'), {
+    type:'bar',
+    data:{ labels:['Abertura %','CTR s/ abertura %'],
+      datasets: seg.map((s,i)=>({
+        label:s.nome,
+        data:[ pct(s.aberturas,s.enviados), pct(s.cliques,s.aberturas) ],
+        backgroundColor: i===0?NAVY:STEEL, borderRadius:3, borderSkipped:false
+      })) },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{...tooltip, callbacks:{ label:c=>c.dataset.label+': '+fmtPct(c.parsed.y) }} },
+      scales:{ x:xAxis, y:{...yAxis, ticks:{...yAxis.ticks, callback:v=>v+'%'}} } }
+  });
+</script>
+</body>
+</html>
